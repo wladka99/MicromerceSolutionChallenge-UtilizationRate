@@ -3,6 +3,10 @@ To run this code:
 - `npm install` or `yarn`
 - `npm run start` or `yarn start`
 
+The relevant files in the src folder to work with are:
+- table-script.tsx -> contains the relevant code for preparing and displaying the data
+- source-data.json -> contains all the relevant data needed for the exercise
+
 ### 📗 User Story
 
 As a User of the Workforce Management Backoffice, I would like to understand workforce utilisation rate on a per person level with associated costs.
