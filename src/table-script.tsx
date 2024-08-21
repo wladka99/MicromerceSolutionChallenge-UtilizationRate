@@ -25,7 +25,7 @@ const tableData: TableDataType[] = (
 ).map((dataRow, index) => {
   const person = `${dataRow?.employees?.firstname} - ...`;
 
-  const row = {
+  const row: TableDataType = {
     person: `${person}`,
     past12Months: `past12Months ${index} placeholder`,
     y2d: `y2d ${index} placeholder`,
