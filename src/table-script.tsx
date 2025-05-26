@@ -23,17 +23,65 @@ import type { SourceDataType, TableDataType } from "./types";
 const tableData: TableDataType[] = (
   sourceData as unknown as SourceDataType[]
 ).map((dataRow, index) => {
-  const person = `${dataRow?.employees?.firstname} - ...`;
 
-  const row: TableDataType = {
-    person: `${person}`,
-    past12Months: `past12Months ${index} placeholder`,
-    y2d: `y2d ${index} placeholder`,
-    may: `may ${index} placeholder`,
-    june: `june ${index} placeholder`,
-    july: `july ${index} placeholder`,
-    netEarningsPrevMonth: `netEarningsPrevMonth ${index} placeholder`,
-  };
+  
+  const personData = dataRow.employees ?? dataRow.externals;
+
+  const person = `${personData?.firstname ?? ""} ${personData?.lastname ?? ""}`;
+
+  const workforceUtil = personData?.workforceUtilisation;
+
+  const past12Months = workforceUtil?.utilisationRateLastTwelveMonths ?? "...";
+  const past12MonthsNumber = parseFloat(past12Months) * 100; 
+
+  const y2d = workforceUtil?.utilisationRateYearToDate ?? "...";
+  const y2dNumber = parseFloat(y2d) * 100;
+
+  const lastThreeMonths = workforceUtil?.lastThreeMonthsIndividually ?? [];
+
+  
+  const getUtilForMonth = (month: string) =>
+    lastThreeMonths.find((m) => m.month.toLowerCase() === month.toLowerCase())?.utilisationRate ?? "...";
+
+  const may = getUtilForMonth("may");
+  const mayNumber = parseFloat(may) * 100;
+  const june = getUtilForMonth("june");
+  const juneNumber = parseFloat(june) * 100;
+  const july = getUtilForMonth("july");
+  const julyNumber = parseFloat(july) * 100;
+
+let latestEarnings = "...";
+const earningsArray = (workforceUtil as any)?.quarterEarnings;
+
+if (Array.isArray(earningsArray) && earningsArray.length > 0) {
+  const last = earningsArray[earningsArray.length - 1];
+  const earnings = last?.earnings;
+  const earningsNumber = parseFloat(earnings);
+  if (!isNaN(earningsNumber)) {
+    latestEarnings = earningsNumber.toFixed(0) + " €";
+  }
+} else {
+  const costsArray = dataRow.externals?.costsByMonth?.costsByMonth;
+  if (Array.isArray(costsArray) && costsArray.length > 0) {
+    const lastCost = costsArray[costsArray.length - 1];
+    const cost = lastCost?.costs;
+    const costNumber = parseFloat(cost);
+    if (!isNaN(costNumber)) {
+      latestEarnings = costNumber.toFixed(0) + " €";
+    }
+  }
+}
+
+
+const row: TableDataType = {
+  person: `${person}`,
+  past12Months: isNaN(past12MonthsNumber) ? "..." : past12MonthsNumber.toFixed(0) + "%",
+  y2d: isNaN(y2dNumber) ? "..." : y2dNumber.toFixed(0) + "%",
+  may: isNaN(mayNumber) ? "..." : mayNumber.toFixed(0) + "%",
+  june: isNaN(juneNumber) ? "..." : juneNumber.toFixed(0) + "%",
+  july: isNaN(julyNumber) ? "..." : julyNumber.toFixed(0) + "%",
+  netEarningsPrevMonth: latestEarnings,
+};
 
   return row;
 });
